@@ -34,7 +34,7 @@ def check_edge(x, y, offset, graph, scale):
         # squared distance of the point (x, y) form the center of the circle above
         dp = (ccx - x) ** 2 + (ccy - y) ** 2
 
-        if dp <= r:
+        if dp < r:
             # magic, don't touch!
             a = n2y - n1y
             b = n1x - n2x
@@ -45,4 +45,10 @@ def check_edge(x, y, offset, graph, scale):
             if d < 5:
                 return edge
 
+    return False
+
+def isEdge(graph, selected):
+    for edge in graph.edges_iter():
+        if selected == edge:
+            return True
     return False
