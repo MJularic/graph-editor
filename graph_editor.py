@@ -9,7 +9,7 @@ from pyglet.window import key
 from pyglet.window import mouse
 from pyglet.gl import *
 from parameter_input import NetworkParameterInput
-
+from load_save_dialog import FileDialog
 
 class App(pyglet.window.Window):
     def __init__(self):
@@ -275,28 +275,17 @@ class App(pyglet.window.Window):
         elif symbol == key.M:
             self.mode = "modify"
         elif symbol == key.S:
-            nx.write_graphml(self.g, "graph.graphml")
-            # get info about the file
-            stat = os.stat("graph.graphml")
-            num_nodes = len(self.g)
-            size = stat.st_size / 1000.0
-            # display info
-            self.cmd_label.text = "{0} nodes written to graph.graphml ({1:,.1f}k)".format(num_nodes, size)
+            file_path = FileDialog.saveFile()
+            nx.write_graphml(self.g, file_path)
+            self.cmd_label.text = "Graph saved to file: " + file_path
         elif symbol == key.L:
             try:
-                self.g = nx.read_graphml("graph.graphml")
-                # get info about the file
-                stat = os.stat("graph.graphml")
-                num_nodes = len(self.g)
-                size = stat.st_size / 1000.0
-                # display info
-                self.cmd_label.text = "{0} nodes loaded from graph.graphml ({1:,.1f}k)".format(num_nodes, size)
-
-                # clean up
+                file_path = FileDialog.loadFile()
+                self.g = nx.read_graphml(file_path)
+                self.cmd_label.text = "Graph loaded from file: " + file_path
                 self.selected = None
             except IOError:
-                # the file was missing
-                self.cmd_label.text = "File graph.graphml not found"
+                self.cmd_label.text = "File " + file_path + " not found"
         elif symbol == key.H:
             self.help = False
         elif symbol == key.Q:
