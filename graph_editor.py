@@ -23,7 +23,6 @@ class App(pyglet.window.Window):
         self.scale = 100.0
         self.zoom_step = 0
         self.help = False
-        self.info = False
         self.drag = False
         self.box = [0, 0, 1000, 1000]
         self.history = []
@@ -43,10 +42,6 @@ class App(pyglet.window.Window):
 
         # labels
         self.cmd_label = pyglet.text.Label("Press 'h' for help", font_name='Sans', font_size=12, x=10, y=6)
-
-        self.info_label = pyglet.text.Label("", multiline=True, x=50, y=self.height - 50,
-                                            width=self.width - 100, height=self.height - 100, anchor_y="top",
-                                            font_name="monospace", font_size=12)
 
         with open("help.txt") as help_file:
             self.help_label = pyglet.text.Label(help_file.read(), multiline=True, x=50, y=self.height - 50,
@@ -112,13 +107,9 @@ class App(pyglet.window.Window):
         oy = self.offset[1]
 
         if self.help:
-            # draw help on the screen
             self.help_label.draw()
-        elif self.info:
-            # draw info on the screen
-            self.info_label.draw()
         else:
-            draw_edges(self.g, self.scale, self.offset)
+            draw_edges(self.g, self.scale, self.offset, self.selected)
             draw_nodes(self.g, self.scale, self.offset, self.selected,
                        self.selected_sprite, self.node_sprite)
 
@@ -145,20 +136,26 @@ class App(pyglet.window.Window):
                 network_param_input.run()
 
             if self.mode == "modify":
-                if self.selected is not None:
-                    print(self.g.node[self.selected])
+                if self.selected is not None and self.g.has_node(self.selected):
                     if self.last_action == "mouse_release":
                         network_param_input = NetworkParameterInput(self.g, self.selected, "node")
+                        network_param_input.run()
+                if self.selected is not None and isEdge(self.g, self.selected):
+                    if self.last_action == "mouse_release":
+                        network_param_input = NetworkParameterInput(self.g, self.selected, "edge")
                         network_param_input.run()
 
     def on_mouse_press(self, x, y, buttons, modifiers):
         self.last_action = "mouse_press"
         node = check_node(x, y, self.offset, self.g, self.scale)
-        # check if a node has not been clicked
+        edge = check_edge(x, y, self.offset, self.g, self.scale)
         if node is not False:
             if self.mode == "modify":
                 self.selected = node
-        elif self.mode == "modify":
+        if edge is not False:
+            if self.mode == "modify":
+                self.selected = edge
+        if self.mode == "modify" and edge is False and node is False:
             self.selected = None
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
@@ -167,7 +164,7 @@ class App(pyglet.window.Window):
             self.offset[0] += dx
             self.offset[1] += dy
         elif buttons & mouse.LEFT and self.mode == "modify":
-            if self.selected is not None:
+            if self.g.has_node(self.selected):
                 node = self.g.node[self.selected]
 
                 if not self.drag:
@@ -266,14 +263,6 @@ class App(pyglet.window.Window):
         self.last_action = "key_press"
         if symbol == key.H:
             self.help = True
-        elif symbol == key.I:
-            self.info = True
-
-            # get info
-            node_number = len(self.g)
-            edge_number = len(self.g.edges())
-
-            self.info_label.text = "Info\n\nNumber of nodes: {0}\nNumber of edges: {1}".format(node_number, edge_number)
 
     def on_key_release(self, symbol, modifiers):
         self.last_action = "key_release"
@@ -310,8 +299,6 @@ class App(pyglet.window.Window):
                 self.cmd_label.text = "File graph.graphml not found"
         elif symbol == key.H:
             self.help = False
-        elif symbol == key.I:
-            self.info = False
         elif symbol == key.Q:
             self.close()
         elif symbol == key.Z:
@@ -326,10 +313,6 @@ class App(pyglet.window.Window):
     def on_resize(self, width, height):
         self.last_action = "resize"
         super(App, self).on_resize(width, height)
-
-        self.info_label.y = self.height - 50
-        self.info_label.width = self.width - 100
-        self.info_label.height = self.height - 100
 
         self.help_label.y = self.height - 50
         self.help_label.width = self.width - 100

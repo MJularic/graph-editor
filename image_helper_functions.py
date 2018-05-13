@@ -8,13 +8,22 @@ def load_images(image):
     return pyglet.sprite.Sprite(node_img)
 
 
-def draw_edges(graph, scale, offset):
+def draw_edges(graph, scale, offset, selected):
     for edge in graph.edges_iter():
-        pyglet.graphics.draw(2, pyglet.gl.GL_LINES, ('v2f', (
-            offset[0] + graph.node[edge[0]]["x"] * scale,
-            offset[1] + graph.node[edge[0]]["y"] * scale,
-            offset[0] + graph.node[edge[1]]["x"] * scale,
-            offset[1] + graph.node[edge[1]]["y"] * scale)))
+        if edge == selected:
+            pyglet.graphics.draw(2, pyglet.gl.GL_LINES, ('v2f', (
+                offset[0] + graph.node[edge[0]]["x"] * scale,
+                offset[1] + graph.node[edge[0]]["y"] * scale,
+                offset[0] + graph.node[edge[1]]["x"] * scale,
+                offset[1] + graph.node[edge[1]]["y"] * scale)),
+                                 ('c3B', (0,255,0,0,255,0)))
+
+        else:
+            pyglet.graphics.draw(2, pyglet.gl.GL_LINES, ('v2f', (
+                offset[0] + graph.node[edge[0]]["x"] * scale,
+                offset[1] + graph.node[edge[0]]["y"] * scale,
+                offset[0] + graph.node[edge[1]]["x"] * scale,
+                offset[1] + graph.node[edge[1]]["y"] * scale)))
 
 
 def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite):
