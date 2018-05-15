@@ -1,25 +1,22 @@
-# Graph Editor
+# Network reliability and availability simulator
 
-Graph Editor is a very simple graph editor which can load and save in the
-graphml format (and more to come).
-
-It is written in python, with pyglet and networkx
-
-## Installation
-
-For now I do not support installation of the program, however you can just
-run it from its folder.
+Fork from [frapa's graph editor](https://github.com/frapa/graph-editor)
 
 ## Dependencies
 
-You need to have pyglet and networkx installed in your system. In Ubuntu
-you can install them just by typing:
+Project is written in **python3** using **pyglet**, **tkinter** and **fastnumber**.
 
-    sudo apt-get install python-pyglet python-networkx
+## Installing dependencies
 
-## Running
+To install the needed dependencies run the provided install.sh script from the terminal.
+You will need **sudo** privileges to run the installation.
 
-Be sure to be in the base directory (that is the directory which contains
-the file graph\_editor.py) and type in the terminal:
+```./install.sh ```
 
-    python graph_editor.py
+## Running the application
+
+Start the **graph_editor.py** program with the following command from the terminal.
+
+``` python3 graph_editor.py ```
+
+When inside the application press and hold **h** on your keyboard to see the full functionality.
