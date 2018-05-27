@@ -1,6 +1,4 @@
-import os
 import copy
-
 import networkx as nx
 from check_node_edge import *
 from image_helper_functions import *
@@ -10,6 +8,7 @@ from pyglet.window import mouse
 from pyglet.gl import *
 from parameter_input import NetworkParameterInput
 from load_save_dialog import FileDialog
+
 
 class App(pyglet.window.Window):
     def __init__(self):
@@ -263,6 +262,7 @@ class App(pyglet.window.Window):
         self.last_action = "key_press"
         if symbol == key.H:
             self.help = True
+
 
     def on_key_release(self, symbol, modifiers):
         self.last_action = "key_release"
