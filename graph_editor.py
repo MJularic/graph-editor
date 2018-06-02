@@ -8,13 +8,16 @@ from pyglet.window import mouse
 from pyglet.gl import *
 from parameter_input import NetworkParameterInput
 from load_save_dialog import FileDialog
+from simulation_parameter_window import SimulationWindow
 
 
 class App(pyglet.window.Window):
     def __init__(self):
-        super(App, self).__init__(800, 600, "Graph Editor", resizable=True)
+        super(App, self).__init__(800, 600, "Network reliability and availability simulator", resizable=True)
         self.set_minimum_size(640, 480)
-
+        self.background_color = (1, 1, 1, 1)
+        self.path = None
+        self.scope = None
         self.g = nx.Graph()
         self.mode = "node"
         self.selected = None
@@ -45,10 +48,10 @@ class App(pyglet.window.Window):
         with open("help.txt") as help_file:
             self.help_label = pyglet.text.Label(help_file.read(), multiline=True, x=50, y=self.height - 50,
                                                 width=self.width - 100, height=self.height - 100, anchor_y="top",
-                                                font_name="monospace", font_size=12)
+                                                font_name="monospace", font_size=12, color=(0, 0, 0, 255))
         # load images
-        self.node_sprite = load_images("node.png")
-        self.selected_sprite = load_images("selected.png")
+        self.node_sprite = load_images("router.gif")
+        self.selected_sprite = load_images("router-selected.gif")
 
     def undo(self):
         if self.history_index == -1:
@@ -100,6 +103,7 @@ class App(pyglet.window.Window):
             self.cmd_label.text = "'{0}' operation redone".format(change[0])
 
     def on_draw(self):
+        pyglet.gl.glClearColor(*self.background_color)
         self.clear()
 
         ox = self.offset[0]
@@ -265,6 +269,7 @@ class App(pyglet.window.Window):
 
 
     def on_key_release(self, symbol, modifiers):
+        self.reset_sim_params()
         self.last_action = "key_release"
         if symbol == key.N:
             self.mode = "node"
@@ -298,6 +303,31 @@ class App(pyglet.window.Window):
             self.set_fullscreen(not self.fullscreen)
         elif symbol == key.ESCAPE:
             self.selected = None
+        elif symbol == key.I:
+            self.mode = "simulation"
+            while True:
+                window_scope = SimulationWindow("scope")
+                window_scope.run()
+                self.scope = window_scope.getResult()
+                if window_scope.wasClosed():
+                    self.reset_sim_params()
+                    break
+                if self.scope == "entire_network":
+                    break
+
+                window_path = SimulationWindow("path")
+                window_path.run()
+                if window_path.wasClosed():
+                    self.reset_sim_params()
+                    break
+                self.path = window_path.getResult()
+                if self.path is not None:
+                    break
+        elif symbol == key.T and self.mode == "simulation":
+            if self.scope == "entire_network":
+                self.calculation_entire_network()
+
+
 
     def on_resize(self, width, height):
         self.last_action = "resize"
@@ -313,6 +343,14 @@ class App(pyglet.window.Window):
         self.line.vertices[0] = self.width - 200
         self.line.vertices[2] = self.width - 200
 
+    def calculation_entire_network(self):
+        # !!! FUNCTION IN PROGRESS !!!
+        print("Calculation for entire network")
+        pass
+
+    def reset_sim_params(self):
+        self.scope = None
+        self.path = None
 
 if __name__ == "__main__":
     window = App()

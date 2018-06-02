@@ -18,13 +18,16 @@ def draw_edges(graph, scale, offset, selected):
                                                     offset[0] + graph.node[edge[1]]["x"] * scale,
                                                     offset[1] + graph.node[edge[1]]["y"] * scale)
                                                    ),
-                                                  ('c3B/dynamic', (255, 255, 255, 255, 255, 255))
+                                                  ('c3B/dynamic', (0, 0, 255, 0, 0, 255))
                                                   )
+
+        pyglet.gl.glLineWidth(4)
         if edge == selected:
             vertex_list.colors[:6] = (0, 255, 0, 0, 255, 0)
             vertex_list.draw(pyglet.gl.GL_LINES)
         else:
             vertex_list.draw(pyglet.gl.GL_LINES)
+        pyglet.gl.glLineWidth(1)
 
 
 def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite):

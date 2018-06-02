@@ -77,3 +77,5 @@ class SimulationWindow:
     def _submit(self):
         self.result = self.mode.get()
         self._quit()
+
+

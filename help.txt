@@ -5,6 +5,7 @@ The following commands are available (just press the key for the command):
     d - switch to 'delete' mode (for deleting nodes and edges) 
     e - switch to 'edge' mode (for adding edges)
     h - displays this help message
+    i - switch to 'simulation' mode
     l - load graph, discarding current
     m - switch to 'modify' mode (for modifying attributes and move nodes)
     n - switch to 'node' mode (for adding nodes)
