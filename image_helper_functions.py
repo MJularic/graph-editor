@@ -30,7 +30,7 @@ def draw_edges(graph, scale, offset, selected):
         pyglet.gl.glLineWidth(1)
 
 
-def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite):
+def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite, selected_nodes):
     for node in graph.nodes_iter():
         if node == selected:
             selected_sprite.position = (offset[0] + graph.node[node]["x"] * scale,
@@ -40,3 +40,14 @@ def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite):
             node_sprite.position = (offset[0] + graph.node[node]["x"] * scale,
                                     offset[1] + graph.node[node]["y"] * scale)
             node_sprite.draw()
+
+
+def draw_simulation_nodes(graph, scale, offset, selected_sprite, selected_nodes):
+    if len(selected_nodes) == 0:
+        return
+    for node in graph.nodes_iter():
+        for i in (0, len(selected_nodes)-1):
+            if node == selected_nodes[i]:
+                selected_sprite.position = (offset[0] + graph.node[node]["x"] * scale,
+                                            offset[1] + graph.node[node]["y"] * scale)
+                selected_sprite.draw()

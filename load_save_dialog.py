@@ -9,6 +9,8 @@ class FileDialog:
         root = tk.Tk()
         root.withdraw()
         file_path = filedialog.askopenfilename(parent=root, title="Select file", filetypes=[("graphml files", "*.graphml")])
+        root.quit()
+        root.destroy()
         return file_path
 
     @staticmethod
@@ -16,5 +18,7 @@ class FileDialog:
         root=tk.Tk()
         root.withdraw()
         file_path = filedialog.asksaveasfilename(parent=root, title="Save file", filetypes=[("graphml files", "*.graphml")])
+        root.quit()
+        root.destroy()
         return file_path
 

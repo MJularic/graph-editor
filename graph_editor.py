@@ -16,6 +16,9 @@ class App(pyglet.window.Window):
         super(App, self).__init__(800, 600, "Network reliability and availability simulator", resizable=True)
         self.set_minimum_size(640, 480)
         self.background_color = (1, 1, 1, 1)
+        self.selected_nodes = []
+        self.selected_path_1 = []
+        self.selected_path_2 = []
         self.path = None
         self.scope = None
         self.g = nx.Graph()
@@ -114,24 +117,22 @@ class App(pyglet.window.Window):
         else:
             draw_edges(self.g, self.scale, self.offset, self.selected)
             draw_nodes(self.g, self.scale, self.offset, self.selected,
-                       self.selected_sprite, self.node_sprite)
+                       self.selected_sprite, self.node_sprite, self.selected_nodes)
+            if self.scope == "node_pair" and self.path == "shortest_path":
+                draw_simulation_nodes(self.g, self.scale, self.offset, self.selected_sprite, self.selected_nodes)
 
-            # draw borders
             pyglet.graphics.draw(4, pyglet.gl.GL_LINE_LOOP,
                                  ('v2f', (self.box[0] * self.scale + ox, self.box[1] * self.scale + oy,
                                           self.box[2] * self.scale + ox, self.box[1] * self.scale + oy,
                                           self.box[2] * self.scale + ox, self.box[3] * self.scale + oy,
                                           self.box[0] * self.scale + ox, self.box[3] * self.scale + oy)))
 
-            # draw statusbar
             self.statusbar.draw(pyglet.gl.GL_QUADS)
             self.line.draw(pyglet.gl.GL_LINES)
 
-            # draw mode in the statusbar
             mode_label = pyglet.text.Label(self.mode, font_name='Sans', font_size=12, x=self.width - 190, y=6)
             mode_label.draw()
 
-            # draw command
             self.cmd_label.draw()
 
             if self.mode == "node" and self.last_action == "mouse_release":
@@ -155,11 +156,19 @@ class App(pyglet.window.Window):
         if node is not False:
             if self.mode == "modify":
                 self.selected = node
+            if self.mode == "simulation" and self.scope == "node_pair" and self.path == "shortest_path":
+                if len(self.selected_nodes) == 2:
+                    self.selected_nodes.pop(0)
+                self.selected_nodes.append(node)
         if edge is not False:
             if self.mode == "modify":
                 self.selected = edge
         if self.mode == "modify" and edge is False and node is False:
             self.selected = None
+        if self.mode == "simulation" and self.scope == "node_pair" and self.path == "selected_path":
+            pass
+
+
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         self.last_action = "mouse_drag"
@@ -267,10 +276,9 @@ class App(pyglet.window.Window):
         if symbol == key.H:
             self.help = True
 
-
     def on_key_release(self, symbol, modifiers):
-        self.reset_sim_params()
         self.last_action = "key_release"
+        self.reset_sim_params(symbol)
         if symbol == key.N:
             self.mode = "node"
         elif symbol == key.E:
@@ -305,20 +313,20 @@ class App(pyglet.window.Window):
             self.selected = None
         elif symbol == key.I:
             self.mode = "simulation"
+            self.selected = None
             while True:
                 window_scope = SimulationWindow("scope")
                 window_scope.run()
                 self.scope = window_scope.getResult()
                 if window_scope.wasClosed():
-                    self.reset_sim_params()
+                    self.reset_sim_params("aborted_sim_param_selection")
                     break
                 if self.scope == "entire_network":
                     break
-
                 window_path = SimulationWindow("path")
                 window_path.run()
                 if window_path.wasClosed():
-                    self.reset_sim_params()
+                    self.reset_sim_params("aborted_sim_param_selection")
                     break
                 self.path = window_path.getResult()
                 if self.path is not None:
@@ -326,8 +334,8 @@ class App(pyglet.window.Window):
         elif symbol == key.T and self.mode == "simulation":
             if self.scope == "entire_network":
                 self.calculation_entire_network()
-
-
+            if self.scope == "node_pair" and self.path == "shortest_path":
+                self.calculation_node_pair_shortest()
 
     def on_resize(self, width, height):
         self.last_action = "resize"
@@ -343,14 +351,27 @@ class App(pyglet.window.Window):
         self.line.vertices[0] = self.width - 200
         self.line.vertices[2] = self.width - 200
 
+    def calculation_node_pair_shortest(self):
+        if len(self.selected_nodes) != 2:
+            print("Please select 2 nodes: " + str(self.selected_nodes))
+            return
+        print("Calculation for node pair in shortest path mode")
+        print("Selected nodes: " + str(self.selected_nodes))
+        pass
+
     def calculation_entire_network(self):
         # !!! FUNCTION IN PROGRESS !!!
         print("Calculation for entire network")
         pass
 
-    def reset_sim_params(self):
-        self.scope = None
-        self.path = None
+    def reset_sim_params(self, symbol):
+        if symbol == key.N or symbol == key.E or symbol == key.M or symbol == key.D or symbol == key.I \
+                or symbol == "aborted_sim_param_selection":
+            self.selected_nodes = []
+            self.scope = None
+            self.path = None
+        return
+
 
 if __name__ == "__main__":
     window = App()
