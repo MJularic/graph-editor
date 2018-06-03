@@ -49,10 +49,10 @@ class App(pyglet.window.Window):
                                                 width=self.width - 100, height=self.height - 100, anchor_y="top",
                                                 font_name="monospace", font_size=12, color=(0, 0, 0, 255))
 
-        self.node_sprite = load_images("router.gif")
-        self.selected_sprite = load_images("router-selected.gif")
-        self.selected_primary = load_images("router-primary-path.gif")
-        self.selected_secondary = load_images("router-secondary-path.gif")
+        self.node_sprite = load_images("icons/router.gif")
+        self.selected_sprite = load_images("icons/router-selected.gif")
+        self.selected_primary = load_images("icons/router-primary-path.gif")
+        self.selected_secondary = load_images("icons/router-secondary-path.gif")
 
     def undo(self):
         if self.history_index == -1:
