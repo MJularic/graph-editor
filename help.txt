@@ -2,6 +2,7 @@ Help
 
 The following commands are available (just press the key for the command):
 
+    c - press and hold in select_path mode to select start and end node
     d - switch to 'delete' mode (for deleting nodes and edges) 
     e - switch to 'edge' mode (for adding edges)
     h - displays this help message
@@ -9,7 +10,9 @@ The following commands are available (just press the key for the command):
     l - load graph, discarding current
     m - switch to 'modify' mode (for modifying attributes and move nodes)
     n - switch to 'node' mode (for adding nodes)
+    p - hold p in select_path mode to select primary path
     q - quit program without saving
+    r - hold r in select_path mode to select secondary path
     s - save graph
     t - input simulation time and start simulation
     y - redo last change
