@@ -1,16 +1,20 @@
 import tkinter as tk
 from fastnumbers import fast_float
+from tkinter import messagebox
 
-class NetworkParameterInput():
+
+class NetworkParameterInput:
     def __init__(self, graph, selected, object):
         self.graph = graph
         self.selected = selected
         self.object = object
         self.root = tk.Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self._onClosing)
         self._setLabels()
         self._setEntry()
         self._setButtons()
         self._customizeRoot()
+        self.closed = False
 
     def _setLabels(self):
         tk.Label(self.root, text="Failure intensity").grid(row=0)
@@ -18,6 +22,15 @@ class NetworkParameterInput():
 
         if self.object == "edge":
             tk.Label(self.root, text="Weight").grid(row=2)
+
+    def _onClosing(self):
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.root.quit()
+            self.root.destroy()
+            self.closed = True
+
+    def wasClosed(self):
+        return self.closed
 
     def _setEntry(self):
         self.failure_intensity = tk.Entry(self.root)

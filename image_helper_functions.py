@@ -30,7 +30,7 @@ def draw_edges(graph, scale, offset, selected):
         pyglet.gl.glLineWidth(1)
 
 
-def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite, selected_nodes):
+def draw_nodes(graph, scale, offset, selected, selected_sprite, node_sprite):
     for node in graph.nodes_iter():
         if node == selected:
             selected_sprite.position = (offset[0] + graph.node[node]["x"] * scale,
@@ -48,6 +48,35 @@ def draw_simulation_nodes(graph, scale, offset, selected_sprite, selected_nodes)
     for node in graph.nodes_iter():
         for i in (0, len(selected_nodes)-1):
             if node == selected_nodes[i]:
+                selected_sprite.position = (offset[0] + graph.node[node]["x"] * scale,
+                                            offset[1] + graph.node[node]["y"] * scale)
+                selected_sprite.draw()
+
+
+def draw_simulation_path(graph, scale, offset, selected_sprite, selected_path, path_type="primary"):
+    if len(selected_path) == 0:
+        return
+    for edge in graph.edges_iter():
+        for i in range(0, len(selected_path)):
+            pyglet.gl.glLineWidth(4)
+            if edge == selected_path[i]:
+                vertex_list = pyglet.graphics.vertex_list(2,
+                                                          ('v2f',
+                                                           (offset[0] + graph.node[edge[0]]["x"] * scale,
+                                                            offset[1] + graph.node[edge[0]]["y"] * scale,
+                                                            offset[0] + graph.node[edge[1]]["x"] * scale,
+                                                            offset[1] + graph.node[edge[1]]["y"] * scale)
+                                                           ),
+                                                          ('c3B/dynamic', (255, 0, 0, 255, 0, 0))
+                                                          )
+                if path_type == "secondary":
+                    vertex_list.colors[:6] = (76, 36, 76, 76, 36, 76)
+                vertex_list.draw(pyglet.gl.GL_LINES)
+            pyglet.gl.glLineWidth(1)
+
+    for node in graph.nodes_iter():
+        for i in range(0, len(selected_path)):
+            if node == selected_path[i]:
                 selected_sprite.position = (offset[0] + graph.node[node]["x"] * scale,
                                             offset[1] + graph.node[node]["y"] * scale)
                 selected_sprite.draw()

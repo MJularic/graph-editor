@@ -11,6 +11,7 @@ The following commands are available (just press the key for the command):
     n - switch to 'node' mode (for adding nodes)
     q - quit program without saving
     s - save graph
+    t - input simulation time and start simulation
     y - redo last change
     z - undo last change
 
