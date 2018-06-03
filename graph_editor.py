@@ -1,6 +1,4 @@
-import os
 import copy
-
 import networkx as nx
 from check_node_edge import *
 from image_helper_functions import *
@@ -10,12 +8,17 @@ from pyglet.window import mouse
 from pyglet.gl import *
 from parameter_input import NetworkParameterInput
 from load_save_dialog import FileDialog
+from simulation_parameter_window import SimulationWindow
+from simulation_params_container import SimulationParamsContainer
+from alert_box import Alert
+from time_input_window import TimeInputWindow
 
 class App(pyglet.window.Window):
     def __init__(self):
-        super(App, self).__init__(800, 600, "Graph Editor", resizable=True)
+        super(App, self).__init__(800, 600, "Network reliability and availability simulator", resizable=True)
         self.set_minimum_size(640, 480)
-
+        self.background_color = (1, 1, 1, 1)
+        self.sim_container = SimulationParamsContainer()
         self.g = nx.Graph()
         self.mode = "node"
         self.selected = None
@@ -30,7 +33,6 @@ class App(pyglet.window.Window):
         self.sidebar_width = 300
         self.last_action = None
 
-        # create vertex list
         self.statusbar = pyglet.graphics.vertex_list(4,
                                                      ('v2f', (0, 0, self.width, 0, self.width, 24, 0, 24)),
                                                      ('c3B', (30, 30, 30) * 4)
@@ -40,16 +42,17 @@ class App(pyglet.window.Window):
                                                 ('c3B', (80, 80, 80) * 2)
                                                 )
 
-        # labels
         self.cmd_label = pyglet.text.Label("Press 'h' for help", font_name='Sans', font_size=12, x=10, y=6)
 
         with open("help.txt") as help_file:
             self.help_label = pyglet.text.Label(help_file.read(), multiline=True, x=50, y=self.height - 50,
                                                 width=self.width - 100, height=self.height - 100, anchor_y="top",
-                                                font_name="monospace", font_size=12)
-        # load images
-        self.node_sprite = load_images("node.png")
-        self.selected_sprite = load_images("selected.png")
+                                                font_name="monospace", font_size=12, color=(0, 0, 0, 255))
+
+        self.node_sprite = load_images("router.gif")
+        self.selected_sprite = load_images("router-selected.gif")
+        self.selected_primary = load_images("router-primary-path.gif")
+        self.selected_secondary = load_images("router-secondary-path.gif")
 
     def undo(self):
         if self.history_index == -1:
@@ -101,6 +104,7 @@ class App(pyglet.window.Window):
             self.cmd_label.text = "'{0}' operation redone".format(change[0])
 
     def on_draw(self):
+        pyglet.gl.glClearColor(*self.background_color)
         self.clear()
 
         ox = self.offset[0]
@@ -112,28 +116,43 @@ class App(pyglet.window.Window):
             draw_edges(self.g, self.scale, self.offset, self.selected)
             draw_nodes(self.g, self.scale, self.offset, self.selected,
                        self.selected_sprite, self.node_sprite)
+            if self.sim_container.isShortestPath():
+                draw_simulation_nodes(self.g,
+                                      self.scale,
+                                      self.offset,
+                                      self.selected_sprite,
+                                      self.sim_container.selected_nodes)
+            if self.sim_container.isSelectPath():
+                draw_simulation_nodes(self.g,
+                                      self.scale,
+                                      self.offset,
+                                      self.selected_sprite,
+                                      self.sim_container.start_end_node)
+                draw_simulation_path(self.g,
+                                     self.scale,
+                                     self.offset,
+                                     self.selected_primary,
+                                     self.sim_container.selected_path1)
+                draw_simulation_path(self.g,
+                                     self.scale,
+                                     self.offset,
+                                     self.selected_secondary,
+                                     self.sim_container.selected_path2,
+                                     "secondary")
 
-            # draw borders
             pyglet.graphics.draw(4, pyglet.gl.GL_LINE_LOOP,
                                  ('v2f', (self.box[0] * self.scale + ox, self.box[1] * self.scale + oy,
                                           self.box[2] * self.scale + ox, self.box[1] * self.scale + oy,
                                           self.box[2] * self.scale + ox, self.box[3] * self.scale + oy,
                                           self.box[0] * self.scale + ox, self.box[3] * self.scale + oy)))
 
-            # draw statusbar
             self.statusbar.draw(pyglet.gl.GL_QUADS)
             self.line.draw(pyglet.gl.GL_LINES)
 
-            # draw mode in the statusbar
             mode_label = pyglet.text.Label(self.mode, font_name='Sans', font_size=12, x=self.width - 190, y=6)
             mode_label.draw()
 
-            # draw command
             self.cmd_label.draw()
-
-            if self.mode == "node" and self.last_action == "mouse_release":
-                network_param_input = NetworkParameterInput(self.g, self.selected, "node")
-                network_param_input.run()
 
             if self.mode == "modify":
                 if self.selected is not None and self.g.has_node(self.selected):
@@ -152,9 +171,13 @@ class App(pyglet.window.Window):
         if node is not False:
             if self.mode == "modify":
                 self.selected = node
+            self.sim_container.addNetworkElementToSimulationParams(node, "node")
+
         if edge is not False:
             if self.mode == "modify":
                 self.selected = edge
+            self.sim_container.addNetworkElementToSimulationParams(edge)
+
         if self.mode == "modify" and edge is False and node is False:
             self.selected = None
 
@@ -183,13 +206,15 @@ class App(pyglet.window.Window):
         if buttons & mouse.LEFT:
             if self.mode == "node":
                 node = check_node(x, y, self.offset, self.g, self.scale)
-                # check if a node has not been clicked
                 if node is False:
                     self.g.add_node(len(self.g), x=float(x - self.offset[0]) / self.scale,
                                     y=float(y - self.offset[1]) / self.scale)
                     self.selected = len(self.g) - 1
-
-                    # add to history
+                    network_param_input = NetworkParameterInput(self.g, self.selected, "node")
+                    network_param_input.run()
+                    if network_param_input.wasClosed():
+                        self.g.remove_node(self.selected)
+                        return
                     self.history_index += 1
                     del self.history[self.history_index:len(self.history)]
                     self.history.append(("add", self.selected, copy.copy(self.g.node[self.selected])))
@@ -213,6 +238,9 @@ class App(pyglet.window.Window):
                             self.g.add_edge(self.selected, node)
                             network_param_input = NetworkParameterInput(self.g, [self.selected, node], "edge")
                             network_param_input.run()
+                            if network_param_input.wasClosed():
+                                self.g.remove_edge(self.selected, node)
+                                return
                             # add to history
                             self.history_index += 1
                             del self.history[self.history_index:len(self.history)]
@@ -263,9 +291,16 @@ class App(pyglet.window.Window):
         self.last_action = "key_press"
         if symbol == key.H:
             self.help = True
+        if symbol == key.C:
+            self.sim_container.choose = True
+        if symbol == key.P and self.sim_container.isSelectPath():
+            self.sim_container.path1 = True
+        if symbol == key.R and self.sim_container.isSelectPath():
+            self.sim_container.path2 = True
 
     def on_key_release(self, symbol, modifiers):
         self.last_action = "key_release"
+        self.sim_container.resetSimParams(symbol)
         if symbol == key.N:
             self.mode = "node"
         elif symbol == key.E:
@@ -290,6 +325,12 @@ class App(pyglet.window.Window):
             self.help = False
         elif symbol == key.Q:
             self.close()
+        elif symbol == key.C:
+            self.sim_container.choose = False
+        elif symbol == key.P:
+            self.sim_container.path1 = False
+        elif symbol == key.R:
+            self.sim_container.path2 = False
         elif symbol == key.Z:
             self.undo()
         elif symbol == key.Y:
@@ -298,6 +339,41 @@ class App(pyglet.window.Window):
             self.set_fullscreen(not self.fullscreen)
         elif symbol == key.ESCAPE:
             self.selected = None
+        elif symbol == key.I:
+            self.mode = "simulation"
+            self.selected = None
+            while True:
+                window_scope = SimulationWindow("scope")
+                window_scope.run()
+                self.sim_container.scope = window_scope.getResult()
+                if window_scope.wasClosed():
+                    self.sim_container.resetSimParams("aborted_sim_param_selection")
+                    break
+                if self.sim_container.scope == "entire_network":
+                    break
+                window_path = SimulationWindow("path")
+                window_path.run()
+                if window_path.wasClosed():
+                    self.sim_container.resetSimParams("aborted_sim_param_selection")
+                    break
+                self.sim_container.path = window_path.getResult()
+                if self.sim_container.path is not None:
+                    break
+        elif symbol == key.T and self.mode == "simulation":
+            time_input_window = TimeInputWindow()
+            time_input_window.run()
+            if time_input_window.getResult() is None and self.sim_container.time is None:
+                return
+            if time_input_window.getResult() is not None:
+                self.sim_container.time = time_input_window.getResult()
+            if self.sim_container is None:
+                return
+            if self.sim_container.scope == "entire_network":
+                self.calculation_entire_network()
+            if self.sim_container.isShortestPath():
+                self.calculation_node_pair_shortest()
+            if self.sim_container.isSelectPath():
+                self.calculation_node_pair_selected()
 
     def on_resize(self, width, height):
         self.last_action = "resize"
@@ -312,6 +388,34 @@ class App(pyglet.window.Window):
 
         self.line.vertices[0] = self.width - 200
         self.line.vertices[2] = self.width - 200
+
+    def calculation_node_pair_shortest(self):
+        if len(self.sim_container.selected_nodes) != 2:
+            Alert.alert("Select 2 nodes!!!")
+            return
+        if len(self.sim_container.selected_nodes) == 2:
+            if self.sim_container.selected_nodes[0] == self.sim_container.selected_nodes[1]:
+                Alert.alert("Select 2 nodes!!!")
+                return
+        print("Calculation for node pair in shortest path mode")
+        print("Selected nodes: " + str(self.sim_container.selected_nodes))
+        print("Time: " + str(self.sim_container.time))
+
+    def calculation_node_pair_selected(self):
+        if len(self.sim_container.start_end_node) != 2:
+            Alert.alert("Select start and end node by holding 'c' and clicking the desired nodes!!!")
+            return
+        print("PRIMARY PATH: " + str(self.sim_container.selected_path1))
+        print("SECONDARY PATH: " + str(self.sim_container.selected_path2))
+        print("Time: " + str(self.sim_container.time))
+
+    def calculation_entire_network(self):
+        if nx.is_connected(self.g):
+            # !!! FUNCTION IN PROGRESS !!!
+            print("Calculation for entire network")
+            print("Time: " + str(self.sim_container.time))
+        else:
+            Alert.alert("Graph must be CONNECTED!!!")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ def check_node(x, y, offset, graph, scale):
 
     for node in graph.nodes_iter():
         d = (graph.node[node]["x"] * scale - x) ** 2 + (graph.node[node]["y"] * scale - y) ** 2
-        if d < 36:
+        if d < 50:
             return node
 
     return False
