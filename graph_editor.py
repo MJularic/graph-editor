@@ -312,6 +312,8 @@ class App(pyglet.window.Window):
             self.mode = "modify"
         elif symbol == key.S:
             file_path = FileDialog.saveFile()
+            if len(file_path) == 0:
+                return
             nx.write_graphml(self.g, file_path)
             self.cmd_label.text = "Graph saved to file: " + file_path
         elif symbol == key.L:
@@ -320,7 +322,6 @@ class App(pyglet.window.Window):
                 if len(file_path) == 0:
                     return
                 self.g = nx.read_graphml(file_path, node_type=int)
-                print(self.g.nodes())
                 self.cmd_label.text = "Graph loaded from file: " + file_path
                 self.selected = None
             except IOError:
