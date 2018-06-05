@@ -33,13 +33,27 @@ class SimulationParamsContainer:
             return True
         return False
 
-    def isShortestPath(self):
+    def isShortestPathPair(self):
         if self.scope == "node_pair" and self.path == "shortest_path":
             return True
         return False
 
+    def isAllPathsEntire(self):
+        if self.path == "all_paths" and self.scope == "entire_network":
+            return True
+        return False
+    def isShortestPathEntire(self):
+        if self.path == "shortest_path" and self.scope == "entire_network":
+            return True
+        return False
+
+    def isAllPathsPair(self):
+        if self.path == "all_paths" and self.scope == "node_pair":
+            return True
+        return False
+
     def addNetworkElementToSimulationParams(self, element, type="edge"):
-        if self.isShortestPath():
+        if self.isShortestPathPair() or self.isAllPathsPair():
             if type == "node":
                 self.addStartEndNode(element, self.selected_nodes)
         if self.isSelectPath():

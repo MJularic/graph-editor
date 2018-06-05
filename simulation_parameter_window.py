@@ -10,20 +10,20 @@ class SimulationWindow:
         self.closed = False
         self.root.protocol("WM_DELETE_WINDOW", self._onClosing)
         self._setTitle(mode)
-        self.root.geometry("300x80")
+        self.root.geometry("300x100")
         self.root.resizable(False, False)
         self._setButtons(mode)
 
     def _setMode(self, mode):
         if mode == "scope":
             self.mode = tk.StringVar(value="entire_network")
-        if mode == "path":
+        if mode == "pair_path" or mode == "entire_path":
             self.mode = tk.StringVar(value="shortest_path")
 
     def _setTitle(self, mode):
         if mode == "scope":
             self.root.title("Choose simulation mode")
-        if mode == "path":
+        if mode == "pair_path" or mode == "entire_path":
             self.root.title("Choose path mode")
 
     def run(self):
@@ -54,7 +54,7 @@ class SimulationWindow:
 
             tk.Button(self.root, text="Submit", command=self._submit).\
                 grid(row=3, column=2, sticky=tk.W, padx=100)
-        if mode == "path":
+        if mode == "pair_path":
             tk.Radiobutton(self.root,
                            text="Shortest path",
                            variable=self.mode,
@@ -63,7 +63,27 @@ class SimulationWindow:
                            text="Select path",
                            variable=self.mode,
                            value="select_path").grid(row=2, column=2, sticky=tk.W, padx=100)
+            tk.Radiobutton(self.root,
+                           text="All paths",
+                           variable=self.mode,
+                           value="all_paths").grid(row=3, column=2, sticky=tk.W, padx=100)
 
+
+            tk.Button(self.root, text="Submit", command=self._submit). \
+                grid(row=4, column=2, sticky=tk.E, padx=50)
+
+            tk.Button(self.root, text="Back", command=self._quit). \
+                grid(row=4, column=2, sticky=tk.W, padx=50)
+
+        if mode == "entire_path":
+            tk.Radiobutton(self.root,
+                           text="Shortest path",
+                           variable=self.mode,
+                           value="shortest_path").grid(row=1, column=2, sticky=tk.W, padx=100)
+            tk.Radiobutton(self.root,
+                           text="All paths",
+                           variable=self.mode,
+                           value="all_paths").grid(row=2, column=2, sticky=tk.W, padx=100)
             tk.Button(self.root, text="Submit", command=self._submit). \
                 grid(row=3, column=2, sticky=tk.E, padx=50)
 

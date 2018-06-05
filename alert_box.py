@@ -4,9 +4,9 @@ import tkinter as tk
 class Alert:
 
     @staticmethod
-    def alert(message):
+    def alert(message, title):
         root = tk.Tk()
         root.withdraw()
-        messagebox.showinfo(title="ERROR", message=message)
+        messagebox.showinfo(title=title, message=message)
         root.destroy()
         root.quit()

@@ -12,6 +12,7 @@ from simulation_parameter_window import SimulationWindow
 from simulation_params_container import SimulationParamsContainer
 from alert_box import Alert
 from time_input_window import TimeInputWindow
+from availability_reliability_functions import *
 
 class App(pyglet.window.Window):
     def __init__(self):
@@ -116,7 +117,7 @@ class App(pyglet.window.Window):
             draw_edges(self.g, self.scale, self.offset, self.selected)
             draw_nodes(self.g, self.scale, self.offset, self.selected,
                        self.selected_sprite, self.node_sprite)
-            if self.sim_container.isShortestPath():
+            if self.sim_container.isShortestPathPair() or self.sim_container.isAllPathsPair():
                 draw_simulation_nodes(self.g,
                                       self.scale,
                                       self.offset,
@@ -316,7 +317,10 @@ class App(pyglet.window.Window):
         elif symbol == key.L:
             try:
                 file_path = FileDialog.loadFile()
-                self.g = nx.read_graphml(file_path)
+                if len(file_path) == 0:
+                    return
+                self.g = nx.read_graphml(file_path, node_type=int)
+                print(self.g.nodes())
                 self.cmd_label.text = "Graph loaded from file: " + file_path
                 self.selected = None
             except IOError:
@@ -350,15 +354,23 @@ class App(pyglet.window.Window):
                     self.sim_container.resetSimParams("aborted_sim_param_selection")
                     break
                 if self.sim_container.scope == "entire_network":
-                    break
-                window_path = SimulationWindow("path")
-                window_path.run()
-                if window_path.wasClosed():
-                    self.sim_container.resetSimParams("aborted_sim_param_selection")
-                    break
-                self.sim_container.path = window_path.getResult()
-                if self.sim_container.path is not None:
-                    break
+                    window_path = SimulationWindow("entire_path")
+                    window_path.run()
+                    if window_path.wasClosed():
+                        self.sim_container.resetSimParams("aborted_sim_param_selection")
+                        break
+                    self.sim_container.path = window_path.getResult()
+                    if self.sim_container.path is not None:
+                        break
+                else:
+                    window_path = SimulationWindow("pair_path")
+                    window_path.run()
+                    if window_path.wasClosed():
+                        self.sim_container.resetSimParams("aborted_sim_param_selection")
+                        break
+                    self.sim_container.path = window_path.getResult()
+                    if self.sim_container.path is not None:
+                        break
         elif symbol == key.T and self.mode == "simulation":
             time_input_window = TimeInputWindow()
             time_input_window.run()
@@ -368,12 +380,23 @@ class App(pyglet.window.Window):
                 self.sim_container.time = time_input_window.getResult()
             if self.sim_container is None:
                 return
-            if self.sim_container.scope == "entire_network":
-                self.calculation_entire_network()
-            if self.sim_container.isShortestPath():
-                self.calculation_node_pair_shortest()
+
+            graph = transformation(self.g, self.sim_container.time)
+
+            if self.sim_container.isShortestPathEntire():
+                self.calculation_entire_network_shortest_path(graph)
+
+            if self.sim_container.isAllPathsEntire():
+                self.calculation_entire_network_all_paths(graph)
+
+            if self.sim_container.isShortestPathPair():
+                self.calculation_node_pair_shortest(graph)
+
             if self.sim_container.isSelectPath():
-                self.calculation_node_pair_selected()
+                self.calculation_node_pair_selected(graph)
+
+            if self.sim_container.isAllPathsPair():
+                self.calculation_node_pair_all_paths(graph)
 
     def on_resize(self, width, height):
         self.last_action = "resize"
@@ -389,33 +412,100 @@ class App(pyglet.window.Window):
         self.line.vertices[0] = self.width - 200
         self.line.vertices[2] = self.width - 200
 
-    def calculation_node_pair_shortest(self):
+    def calculation_node_pair_all_paths(self, graph):
         if len(self.sim_container.selected_nodes) != 2:
-            Alert.alert("Select 2 nodes!!!")
+            Alert.alert("Select 2 nodes!!!", "ERROR")
             return
         if len(self.sim_container.selected_nodes) == 2:
             if self.sim_container.selected_nodes[0] == self.sim_container.selected_nodes[1]:
-                Alert.alert("Select 2 nodes!!!")
+                Alert.alert("Select 2 nodes!!!", "ERROR")
+                return
+        print("Calculation for node pair in all path mode")
+        print("Selected nodes: " + str(self.sim_container.selected_nodes))
+        print("Time: " + str(self.sim_container.time))
+
+    def calculation_node_pair_shortest(self, graph):
+        if len(self.sim_container.selected_nodes) != 2:
+            Alert.alert("Select 2 nodes!!!", "ERROR")
+            return
+        if len(self.sim_container.selected_nodes) == 2:
+            if self.sim_container.selected_nodes[0] == self.sim_container.selected_nodes[1]:
+                Alert.alert("Select 2 nodes!!!", "ERROR")
                 return
         print("Calculation for node pair in shortest path mode")
         print("Selected nodes: " + str(self.sim_container.selected_nodes))
         print("Time: " + str(self.sim_container.time))
 
-    def calculation_node_pair_selected(self):
+        availability = dijkstraFunctionAvailability(graph,
+                                                    self.sim_container.selected_nodes[0],
+                                                    self.sim_container.selected_nodes[1])
+
+        reliability = dijkstraFunctionReliability(graph,
+                                                  self.sim_container.selected_nodes[0],
+                                                  self.sim_container.selected_nodes[1])
+
+        Alert.alert("Availability: " + str(availability) + "\nReliability: " + str(reliability), "CALCULATION")
+
+    def calculation_node_pair_selected(self, graph):
         if len(self.sim_container.start_end_node) != 2:
-            Alert.alert("Select start and end node by holding 'c' and clicking the desired nodes!!!")
+            Alert.alert("Select start and end node by holding 'c' and clicking the desired nodes!!!", "ERROR")
             return
+        if len(self.sim_container.selected_path1) == 0:
+            Alert.alert("Select a primary path by holding 'p' and clicking on the desired nodes and edges!!!", "ERROR")
+        if len(self.sim_container.selected_path2) == 0:
+            Alert.alert("Select a secondary path by holding 'r' and clicking on the desired nodes and edges!!!", "ERROR")
+
         print("PRIMARY PATH: " + str(self.sim_container.selected_path1))
         print("SECONDARY PATH: " + str(self.sim_container.selected_path2))
         print("Time: " + str(self.sim_container.time))
 
-    def calculation_entire_network(self):
+        primary_path = self.get_nodes_from_path(self.sim_container.selected_path1)
+        primary_path.insert(0, self.sim_container.start_end_node[0])
+        primary_path.append(self.sim_container.start_end_node[1])
+
+        secondary_path = self.get_nodes_from_path(self.sim_container.selected_path2)
+        secondary_path.insert(0, self.sim_container.start_end_node[0])
+        secondary_path.append(self.sim_container.start_end_node[1])
+        print("PRIMARY PATH: " + str(primary_path))
+        print("SECONDARY PATH: " + str(secondary_path))
+
+    def calculation_entire_network_all_paths(self, graph):
         if nx.is_connected(self.g):
             # !!! FUNCTION IN PROGRESS !!!
             print("Calculation for entire network")
+            print("Path mode: " + self.sim_container.path)
             print("Time: " + str(self.sim_container.time))
+
+            availability_average = averageAvailabilityAbraham(graph)
+            st_availability = stAvailabilityAbraham(graph)
+
+            Alert.alert("Average availability: " + str(availability_average) + "\ns-t availability: " +
+                        str(st_availability), "CALCULATION")
+
         else:
-            Alert.alert("Graph must be CONNECTED!!!")
+            Alert.alert("Graph must be CONNECTED!!!", "ERROR")
+
+    def calculation_entire_network_shortest_path(self, graph):
+        if nx.is_connected(self.g):
+            # !!! FUNC IN PROG !!!
+            print("Calculation for entire network")
+            print("Path mode: " + self.sim_container.path)
+            print("Time: " + str(self.sim_container.time))
+
+            average_availability = averageAvailabilityDijkstra(graph)
+            st_availability = stAvailabilityDijkstra(graph)
+
+            Alert.alert("Average availability: " + str(average_availability) + "\ns-t availability: "
+                        + str(st_availability), "CALCULATION")
+        else:
+            Alert.alert("Graph must be CONNECTED!!!", "ERROR")
+
+    def get_nodes_from_path(self, path):
+        pth = []
+        for i in range(0, len(path)):
+            if type(path[i]) is not tuple:
+                pth.append(path[i])
+        return pth
 
 
 if __name__ == "__main__":

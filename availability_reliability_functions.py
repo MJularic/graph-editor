@@ -35,11 +35,12 @@ def dijkstraFunctionReliability(graph, first, last):
             H.remove_edge(minpath[i], minpath[i + 1])
 
     notminpath = nx.dijkstra_path(H, first, last)
-
+    print(minpath)
+    print(notminpath)
     upR = calculateReliability(graph, minpath)
-
+    print(upR)
     downR = calculateReliability(graph, notminpath)
-
+    print(downR)
     paralel1R = upR / (graph.node[minpath[0]]['R'] * graph.node[minpath[len(minpath) - 1]]['R'])
     paralel2R = downR / (graph.node[notminpath[0]]['R'] * graph.node[notminpath[len(notminpath) - 1]]['R'])
     paralelFinalR = (1 - (1 - paralel1R) * (1 - paralel2R))
@@ -118,6 +119,7 @@ def averageAvailabilityAbraham(graph):
     allAvailabilities = []
     for node in nodes:
         for node1 in nodes:
+            print(nodes)
             if (node1 > node):
                 paths = getAllPaths(graph, node, node1)
                 allAvailabilities.append(abraham(graph, paths))
@@ -179,13 +181,13 @@ def customPathReliability(graph, path1,
 def transformation(graph, t):
     novi = nx.Graph()
     nodes = graph.nodes()
-    for i in range(1, len(nodes) + 1):
-        a, r = transformationCalculate(graph.node[i]['lamb'], graph.node[i]['mi'], t)
-        novi.add_node(i, A=a, R=r)
+    for node in nodes:
+        a, r = transformationCalculate(graph.node[node]['failure_intensity'], graph.node[node]['repair_intensity'], t)
+        novi.add_node(node, A=a, R=r)
 
     for u, v, k in graph.edges(data=True):
-        lamb1 = k['lamb']
-        mi1 = k['mi']
+        lamb1 = k['failure_intensity']
+        mi1 = k['repair_intensity']
         a, r = transformationCalculate(lamb1, mi1, t)
         novi.add_edge(u, v, A=a, R=r, weight=k['weight'])
     return novi
@@ -200,15 +202,13 @@ def transformationCalculate(lamb, mi, t):
     return A, R
 
 
-# nx.draw(G)
-# plt.show()
-
+"""
 F = nx.Graph()
 
-F.add_node(1, lamb=0.4, mi=0.999)
-F.add_node(2, lamb=0.2, mi=0.2)
-F.add_node(3, lamb=0.8, mi=0.44)
-F.add_node(4, lamb=0.9, mi=0.32)
+F.add_node(0, failure_intensity=0.4, repair_intensity=0.999)
+F.add_node(2, failure_intensity=0.2, repair_intensity=0.2)
+F.add_node(3, failure_intensity=0.8, repair_intensity=0.44)
+F.add_node(4, failure_intensity=0.9, repair_intensity=0.32)
 
 e1 = (1, 2)
 e2 = (2, 4)
@@ -216,11 +216,11 @@ e3 = (1, 3)
 e4 = (3, 4)
 e5 = (2, 3)
 
-F.add_edge(1, 2, lamb=0.85, mi=0.85, weight=5)  # moze ici umjesto F.add_edge(*e1, lamb=0.85, mi=0.85, weight=5)
-F.add_edge(*e2, lamb=0.85, mi=0.56, weight=6)
-F.add_edge(*e3, lamb=0.85, mi=0.34, weight=1)
-F.add_edge(*e4, lamb=0.85, mi=0.76, weight=2)
-F.add_edge(*e5, lamb=0.85, mi=0.34, weight=3)
+F.add_edge(1, 2, failure_intensity=0.85, repair_intensity=0.85, weight=5)  # moze ici umjesto F.add_edge(*e1, lamb=0.85, mi=0.85, weight=5)
+F.add_edge(*e2, failure_intensity=0.85, repair_intensity=0.56, weight=6)
+F.add_edge(*e3, failure_intensity=0.85, repair_intensity=0.34, weight=1)
+F.add_edge(*e4, failure_intensity=0.85, repair_intensity=0.76, weight=2)
+F.add_edge(*e5, failure_intensity=0.85, repair_intensity=0.34, weight=3)
 
 pocetni = 1
 krajnji = 4
@@ -245,6 +245,4 @@ stAvailabilityDijkstra(G)
 # 9.b 8.c
 averageAvailabilityAbraham(G)
 stAvailabilityAbraham(G)
-
-
-
+"""
