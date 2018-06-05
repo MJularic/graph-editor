@@ -60,7 +60,6 @@ def transform(probabilitiesAppending, otherProbabilities):
 
 # this takes list of groped events for each path
 def calculateAbrahamValueFromEvents(listOfPathEvents):
-
     nds = listOfPathEvents
     ds = []
 
@@ -77,9 +76,6 @@ def calculateAbrahamValueFromEvents(listOfPathEvents):
             listOfEventsToCompare = list(listOfEventsToCompareTemporary)
         ds += listOfEventsToCompare
 
-    for x in ds:
-        print(printArrayOfProbs(x))
-
     # calculate final value
     finalValue = 0
     for events in ds:
@@ -87,7 +83,6 @@ def calculateAbrahamValueFromEvents(listOfPathEvents):
         for event in events:
             multiplication *= (1 - event.value) if event.complemented else event.value
         finalValue += multiplication
-    print(finalValue)
     return finalValue
 
 
@@ -98,10 +93,12 @@ def abraham(graph, listOfPaths):
         # turn edges into probabilities
         for i in range(len(path) - 1):
             if (i < len(path) - 1):
-                pathEvents.append(Probability(str(i) + "e", graph.get_edge_data(path[i], path[i + 1])['R'], False))
+                edgeKey = str(i) + "e"
+                pathEvents.append(Probability(edgeKey, graph.get_edge_data(path[i], path[i + 1])['R'], False))
         # turn nodes into probabilities
         for nodeNumber in path:
             pathEvents.append(Probability(nodeNumber, graph.node[nodeNumber]['R'], False))
+    listOfPathEvents.append(pathEvents)
 
     return calculateAbrahamValueFromEvents(listOfPathEvents)
 
