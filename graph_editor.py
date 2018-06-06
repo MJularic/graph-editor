@@ -13,6 +13,8 @@ from simulation_params_container import SimulationParamsContainer
 from alert_box import Alert
 from time_input_window import TimeInputWindow
 from availability_reliability_functions import *
+from abraham import abraham
+
 
 class App(pyglet.window.Window):
     def __init__(self):
@@ -413,6 +415,7 @@ class App(pyglet.window.Window):
         self.line.vertices[0] = self.width - 200
         self.line.vertices[2] = self.width - 200
 
+    #not_implemented
     def calculation_node_pair_all_paths(self, graph):
         if len(self.sim_container.selected_nodes) != 2:
             Alert.alert("Select 2 nodes!!!", "ERROR")
@@ -425,6 +428,8 @@ class App(pyglet.window.Window):
         print("Selected nodes: " + str(self.sim_container.selected_nodes))
         print("Time: " + str(self.sim_container.time))
 
+
+    #implemented
     def calculation_node_pair_shortest(self, graph):
         if len(self.sim_container.selected_nodes) != 2:
             Alert.alert("Select 2 nodes!!!", "ERROR")
@@ -433,17 +438,16 @@ class App(pyglet.window.Window):
             if self.sim_container.selected_nodes[0] == self.sim_container.selected_nodes[1]:
                 Alert.alert("Select 2 nodes!!!", "ERROR")
                 return
-        print("Calculation for node pair in shortest path mode")
-        print("Selected nodes: " + str(self.sim_container.selected_nodes))
-        print("Time: " + str(self.sim_container.time))
 
-        availability = dijkstraFunctionAvailability(graph,
-                                                    self.sim_container.selected_nodes[0],
-                                                    self.sim_container.selected_nodes[1])
+        availability = dijkstraCalculation(graph,
+                                           self.sim_container.selected_nodes[0],
+                                           self.sim_container.selected_nodes[1],
+                                           'A')
 
-        reliability = dijkstraFunctionReliability(graph,
-                                                  self.sim_container.selected_nodes[0],
-                                                  self.sim_container.selected_nodes[1])
+        reliability = dijkstraCalculation(graph,
+                                          self.sim_container.selected_nodes[0],
+                                          self.sim_container.selected_nodes[1],
+                                          'R')
 
         Alert.alert("Availability: " + str(availability) + "\nReliability: " + str(reliability), "CALCULATION")
 
@@ -456,46 +460,31 @@ class App(pyglet.window.Window):
         if len(self.sim_container.selected_path2) == 0:
             Alert.alert("Select a secondary path by holding 'r' and clicking on the desired nodes and edges!!!", "ERROR")
 
-        print("PRIMARY PATH: " + str(self.sim_container.selected_path1))
-        print("SECONDARY PATH: " + str(self.sim_container.selected_path2))
-        print("Time: " + str(self.sim_container.time))
-
         primary_path = self.get_nodes_from_path(self.sim_container.selected_path1)
-        primary_path.insert(0, self.sim_container.start_end_node[0])
-        primary_path.append(self.sim_container.start_end_node[1])
-
         secondary_path = self.get_nodes_from_path(self.sim_container.selected_path2)
-        secondary_path.insert(0, self.sim_container.start_end_node[0])
-        secondary_path.append(self.sim_container.start_end_node[1])
-        print("PRIMARY PATH: " + str(primary_path))
-        print("SECONDARY PATH: " + str(secondary_path))
+
+        if primary_path == secondary_path:
+            Alert.alert("Primary and secondary path must be different!!!", "ERROR")
+
+        availability = customPath(graph, primary_path, secondary_path, 'A')
+        reliability = customPath(graph, primary_path, secondary_path, 'R')
+
+        Alert.alert("Availability: " + str(availability) + "\nReliability: " + str(reliability), "CALCULATION")
+
 
     def calculation_entire_network_all_paths(self, graph):
         if nx.is_connected(self.g):
-            # !!! FUNCTION IN PROGRESS !!!
-            print("Calculation for entire network")
-            print("Path mode: " + self.sim_container.path)
-            print("Time: " + str(self.sim_container.time))
-
             availability_average = averageAvailabilityAbraham(graph)
             st_availability = stAvailabilityAbraham(graph)
-
             Alert.alert("Average availability: " + str(availability_average) + "\ns-t availability: " +
                         str(st_availability), "CALCULATION")
-
         else:
             Alert.alert("Graph must be CONNECTED!!!", "ERROR")
 
     def calculation_entire_network_shortest_path(self, graph):
         if nx.is_connected(self.g):
-            # !!! FUNC IN PROG !!!
-            print("Calculation for entire network")
-            print("Path mode: " + self.sim_container.path)
-            print("Time: " + str(self.sim_container.time))
-
             average_availability = averageAvailabilityDijkstra(graph)
             st_availability = stAvailabilityDijkstra(graph)
-
             Alert.alert("Average availability: " + str(average_availability) + "\ns-t availability: "
                         + str(st_availability), "CALCULATION")
         else:
@@ -506,6 +495,8 @@ class App(pyglet.window.Window):
         for i in range(0, len(path)):
             if type(path[i]) is not tuple:
                 pth.append(path[i])
+        pth.insert(0, self.sim_container.start_end_node[0])
+        pth.append(self.sim_container.start_end_node[1])
         return pth
 
 
