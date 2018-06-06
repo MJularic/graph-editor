@@ -24,8 +24,6 @@ def calculateAvailability(graph, path):
             availability *= graph.get_edge_data(path[i], path[i + 1])['A']
     return availability
 
-
-# 8a+izracun, 9a
 def dijkstraCalculation(graph, first, last, mode):
     min_path = nx.dijkstra_path(graph, first, last)
     H = graph.copy()
@@ -50,8 +48,6 @@ def dijkstraCalculation(graph, first, last, mode):
     final_a = graph.node[min_path[0]][mode] * graph.node[min_path[len(min_path) - 1]][mode] * paralel_final
     return final_a
 
-
-# 8c
 def getAllPaths(graph, source, target):
     paths = []
     for path in nx.all_simple_paths(graph, source=source, target=target):
@@ -60,9 +56,6 @@ def getAllPaths(graph, source, target):
     paths = sorted(paths, key=lambda x: len(x))
     return paths
 
-
-# za sve parove cvorova
-# 10
 def averageAvailabilityDijkstra(graph):
     nodes = graph.nodes()
     all_availabilities = []
@@ -76,8 +69,6 @@ def averageAvailabilityDijkstra(graph):
     average = sum_availabilities / len(all_availabilities)
     return average
 
-
-# 10
 def stAvailabilityDijkstra(graph):
     nodes = graph.nodes()
     min_availability = 1000
@@ -90,7 +81,6 @@ def stAvailabilityDijkstra(graph):
     return min_availability
 
 
-# 10
 def averageAvailabilityAbraham(graph):
     nodes = graph.nodes()
     all_availabilities = []
@@ -98,7 +88,6 @@ def averageAvailabilityAbraham(graph):
         for node1 in nodes:
             if node1 > node:
                 paths = getAllPaths(graph, node, node1)
-                print(paths)
                 all_availabilities.append(abraham(graph, paths, 'A'))
     sum_availabilities = 0
     for number in all_availabilities:
@@ -107,7 +96,6 @@ def averageAvailabilityAbraham(graph):
     return average
 
 
-# 10
 def stAvailabilityAbraham(graph):
     nodes = graph.nodes()
     min_availability = 1000
@@ -120,9 +108,6 @@ def stAvailabilityAbraham(graph):
                     min_availability = current
     return min_availability
 
-
-# 8b+izracun, 9a
-# TREBAJU SAMO VRHOVI U oblikzu [1, 2, 3, 4] gdje su 1,2,3,4 vrhovi koji ulaze u taj put
 def customPath(graph, path1, path2, mode):
     if mode == 'A':
         up = calculateAvailability(graph, path1)
@@ -137,41 +122,23 @@ def customPath(graph, path1, path2, mode):
     final = graph.node[path1[0]][mode] * graph.node[path1[len(path1) - 1]][mode] * paralel_final
     return final
 
-
-# 8b+izracun, 9b
-def customPathReliability(graph, path1,
-                          path2):  # TREBAJU SAMO VRHOVI U oblikzu [1, 2, 3, 4] gdje su 1,2,3,4 vrhovi koji ulaze u taj put
-    up_r = calculateReliability(graph, path1)
-
-    down_r = calculateReliability(graph, path2)
-
-    paralel_1_r = up_r / (graph.node[path1[0]]['R'] * graph.node[path1[len(path1) - 1]]['R'])
-    paralel_2_r = down_r / (graph.node[path2[0]]['R'] * graph.node[path2[len(path2) - 1]]['R'])
-    paralel_final_r = (1 - (1 - paralel_1_r) * (1 - paralel_2_r))
-
-    final_r = graph.node[path1[0]]['R'] * graph.node[path1[len(path1) - 1]]['R'] * paralel_final_r
-
-    return final_r
-
-
 def transformation(graph, t):
-    novi = nx.Graph()
+    transformed_graph = nx.Graph()
     nodes = graph.nodes()
     for node in nodes:
         a, r = transformationCalculate(graph.node[node]['failure_intensity'], graph.node[node]['repair_intensity'], t)
-        novi.add_node(node, A=a, R=r)
+        transformed_graph.add_node(node, A=a, R=r)
 
     for u, v, k in graph.edges(data=True):
         lamb1 = k['failure_intensity']
         mi1 = k['repair_intensity']
         a, r = transformationCalculate(lamb1, mi1, t)
-        novi.add_edge(u, v, A=a, R=r, weight=k['weight'])
-    return novi
-
+        transformed_graph.add_edge(u, v, A=a, R=r, weight=k['weight'])
+    return transformed_graph
 
 def transformationCalculate(lamb, mi, t):
-    MTTF = 1 / lamb
-    MTTR = 1 / mi
-    A = MTTF / (MTTF + MTTR)
-    R = math.exp(-lamb * t)
-    return A, R
+    mttf = 1 / lamb
+    mttr = 1 / mi
+    a = mttf / (mttf + mttr)
+    r = math.exp(-lamb * t)
+    return a, r

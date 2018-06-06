@@ -14,10 +14,12 @@ class FileDialog:
         return file_path
 
     @staticmethod
-    def saveFile():
+    def saveFile(filetype):
         root=tk.Tk()
         root.withdraw()
-        file_path = filedialog.asksaveasfilename(parent=root, title="Save file", filetypes=[("graphml files", "*.graphml")])
+        file_path = filedialog.asksaveasfilename(parent=root,
+                                                 title="Save file",
+                                                 filetypes=[(filetype + " files", "*." + filetype)])
         root.quit()
         root.destroy()
         return file_path

@@ -313,7 +313,7 @@ class App(pyglet.window.Window):
         elif symbol == key.M:
             self.mode = "modify"
         elif symbol == key.S:
-            file_path = FileDialog.saveFile()
+            file_path = FileDialog.saveFile("graphml")
             if len(file_path) == 0:
                 return
             nx.write_graphml(self.g, file_path)
@@ -415,7 +415,6 @@ class App(pyglet.window.Window):
         self.line.vertices[0] = self.width - 200
         self.line.vertices[2] = self.width - 200
 
-    #not_implemented
     def calculation_node_pair_all_paths(self, graph):
         if len(self.sim_container.selected_nodes) != 2:
             Alert.alert("Select 2 nodes!!!", "ERROR")
@@ -424,12 +423,30 @@ class App(pyglet.window.Window):
             if self.sim_container.selected_nodes[0] == self.sim_container.selected_nodes[1]:
                 Alert.alert("Select 2 nodes!!!", "ERROR")
                 return
-        print("Calculation for node pair in all path mode")
-        print("Selected nodes: " + str(self.sim_container.selected_nodes))
-        print("Time: " + str(self.sim_container.time))
+
+        file_path = FileDialog.saveFile("txt")
+        if len(file_path) == 0:
+            Alert.alert("Select a file to save the calculation results!!!", "ERROR")
+            return
+
+        availability = abraham(graph,
+                               getAllPaths(graph,
+                                           self.sim_container.selected_nodes[0],
+                                           self.sim_container.selected_nodes[1]),
+                               'A')
+
+        reliability = abraham(graph,
+                               getAllPaths(graph,
+                                           self.sim_container.selected_nodes[0],
+                                           self.sim_container.selected_nodes[1]),
+                               'R')
+
+        file = open(file_path, "w")
+        file.write("AVAILABILITY: " + str(availability) + "\n\nRELIABILITY: " + str(reliability))
+        file.close()
+        Alert.alert("Availability: " + str(availability) + "\nReliability: " + str(reliability), "CALCULATIONS")
 
 
-    #implemented
     def calculation_node_pair_shortest(self, graph):
         if len(self.sim_container.selected_nodes) != 2:
             Alert.alert("Select 2 nodes!!!", "ERROR")
@@ -438,6 +455,11 @@ class App(pyglet.window.Window):
             if self.sim_container.selected_nodes[0] == self.sim_container.selected_nodes[1]:
                 Alert.alert("Select 2 nodes!!!", "ERROR")
                 return
+
+        file_path = FileDialog.saveFile("txt")
+        if len(file_path) == 0:
+            Alert.alert("Select a file to save the calculation results!!!", "ERROR")
+            return
 
         availability = dijkstraCalculation(graph,
                                            self.sim_container.selected_nodes[0],
@@ -448,6 +470,9 @@ class App(pyglet.window.Window):
                                           self.sim_container.selected_nodes[0],
                                           self.sim_container.selected_nodes[1],
                                           'R')
+        file = open(file_path, "w")
+        file.write("AVAILABILITY: " + str(availability) + "\n\nRELIABILITY: " + str(reliability))
+        file.close()
 
         Alert.alert("Availability: " + str(availability) + "\nReliability: " + str(reliability), "CALCULATION")
 
@@ -465,26 +490,58 @@ class App(pyglet.window.Window):
 
         if primary_path == secondary_path:
             Alert.alert("Primary and secondary path must be different!!!", "ERROR")
+            return
+
+        file_path = FileDialog.saveFile("txt")
+        if len(file_path) == 0:
+            Alert.alert("Select a file to save the calculation results!!!", "ERROR")
+            return
 
         availability = customPath(graph, primary_path, secondary_path, 'A')
         reliability = customPath(graph, primary_path, secondary_path, 'R')
+
+        file = open(file_path, "w")
+        file.write("AVAILABILITY: " + str(availability) + "\n\nRELIABILITY: " + str(reliability))
+        file.close()
 
         Alert.alert("Availability: " + str(availability) + "\nReliability: " + str(reliability), "CALCULATION")
 
 
     def calculation_entire_network_all_paths(self, graph):
         if nx.is_connected(self.g):
-            availability_average = averageAvailabilityAbraham(graph)
+            file_path = FileDialog.saveFile("txt")
+            if len(file_path) == 0:
+                Alert.alert("Select a file to save the calculation results!!!", "ERROR")
+                return
+            average_availability = averageAvailabilityAbraham(graph)
             st_availability = stAvailabilityAbraham(graph)
-            Alert.alert("Average availability: " + str(availability_average) + "\ns-t availability: " +
+
+            file = open(file_path, "w")
+            file.write("AVERAGE AVAILABILITY: " +
+                       str(average_availability) +
+                       "\n\ns-t AVAILABILITY: " + str(st_availability))
+            file.close()
+
+            Alert.alert("Average availability: " + str(average_availability) + "\ns-t availability: " +
                         str(st_availability), "CALCULATION")
         else:
             Alert.alert("Graph must be CONNECTED!!!", "ERROR")
 
     def calculation_entire_network_shortest_path(self, graph):
         if nx.is_connected(self.g):
+            file_path = FileDialog.saveFile("txt")
+            if len(file_path) == 0:
+                Alert.alert("Select a file to save the calculation results!!!", "ERROR")
+                return
+
             average_availability = averageAvailabilityDijkstra(graph)
             st_availability = stAvailabilityDijkstra(graph)
+
+            file = open(file_path, "w")
+            file.write("AVERAGE AVAILABILITY: " +
+                       str(average_availability) +
+                       "\n\ns-t AVAILABILITY: " + str(st_availability))
+
             Alert.alert("Average availability: " + str(average_availability) + "\ns-t availability: "
                         + str(st_availability), "CALCULATION")
         else:
