@@ -1,8 +1,8 @@
 class Probability(object):
     def __init__(self, key, complemented, value):
         self.key = key
-        self.value = value
         self.complemented = complemented
+        self.value = value
 
     def equals(self, probability):
         return self.key == probability.key and self.complemented == probability.complemented
@@ -86,29 +86,31 @@ def calculateAbrahamValueFromEvents(listOfPathEvents):
     return finalValue
 
 
-def abraham(graph, listOfPaths):
+# graph = object from networkx
+# listOfPaths = list of lists containing integer (integer representing node number), sorted from shortest to longest!!
+# valueComputing = attribute of node which contains value to compute (e.g. reliability)
+# example of usage: abraham(G, [[1, 2, 4], [1, 3, 4], [1, 2, 3, 4], [1, 3, 2, 4]], 'R')
+def abraham(graph, listOfPaths, valueComputing):
     listOfPathEvents = []
     for path in listOfPaths:
         pathEvents = []
         # turn edges into probabilities
         for i in range(len(path) - 1):
             if (i < len(path) - 1):
-                edgeKey = str(i) + "e"
-                pathEvents.append(Probability(edgeKey, graph.get_edge_data(path[i], path[i + 1])['R'], False))
+                edgeKey = str(path[i]) + str(path[i + 1]) + "e" if path[i] < path[i + 1] else str(path[i + 1]) + str(path[i]) + "e"
+                pathEvents.append(Probability(edgeKey, False, graph.get_edge_data(path[i], path[i + 1])[valueComputing]))
         # turn nodes into probabilities
         for nodeNumber in path:
-            pathEvents.append(Probability(nodeNumber, graph.node[nodeNumber]['R'], False))
-    listOfPathEvents.append(pathEvents)
-
+            pathEvents.append(Probability(nodeNumber, False, graph.node[nodeNumber][valueComputing]))
+        listOfPathEvents.append(pathEvents)
     return calculateAbrahamValueFromEvents(listOfPathEvents)
 
 
-
-# test with dummy data
-defaultValue = 0.85
-s1 = [Probability(1,False, defaultValue), Probability(2,False, defaultValue)]
-s2 = [Probability(3,False, defaultValue), Probability(4,False, defaultValue)]
-s3 = [Probability(1,False, defaultValue), Probability(5,False, defaultValue), Probability(4,False, defaultValue)]
-s4 = [Probability(3,False, defaultValue), Probability(5,False, defaultValue), Probability(2,False, defaultValue)]
-listOfPathEvents = [s1, s2, s3, s4]
-calculateAbrahamValueFromEvents(listOfPathEvents)
+#### test with dummy data
+# defaultValue = 0.85
+# s1 = [Probability(1,False, defaultValue), Probability(2,False, defaultValue)]
+# s2 = [Probability(3,False, defaultValue), Probability(4,False, defaultValue)]
+# s3 = [Probability(1,False, defaultValue), Probability(5,False, defaultValue), Probability(4,False, defaultValue)]
+# s4 = [Probability(3,False, defaultValue), Probability(5,False, defaultValue), Probability(2,False, defaultValue)]
+# listOfPathEvents = [s1, s2, s3, s4]
+# print(calculateAbrahamValueFromEvents(listOfPathEvents))
