@@ -105,12 +105,3 @@ def abraham(graph, listOfPaths, valueComputing):
         listOfPathEvents.append(pathEvents)
     return calculateAbrahamValueFromEvents(listOfPathEvents)
 
-
-#### test with dummy data
-# defaultValue = 0.85
-# s1 = [Probability(1,False, defaultValue), Probability(2,False, defaultValue)]
-# s2 = [Probability(3,False, defaultValue), Probability(4,False, defaultValue)]
-# s3 = [Probability(1,False, defaultValue), Probability(5,False, defaultValue), Probability(4,False, defaultValue)]
-# s4 = [Probability(3,False, defaultValue), Probability(5,False, defaultValue), Probability(2,False, defaultValue)]
-# listOfPathEvents = [s1, s2, s3, s4]
-# print(calculateAbrahamValueFromEvents(listOfPathEvents))

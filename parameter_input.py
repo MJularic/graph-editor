@@ -17,11 +17,12 @@ class NetworkParameterInput:
         self.closed = False
 
     def _setLabels(self):
-        tk.Label(self.root, text="Failure intensity").grid(row=0)
-        tk.Label(self.root, text="Repair intensity").grid(row=1)
+        tk.Label(self.root, text="Failure intensity [1/h]").grid(row=0)
+        tk.Label(self.root, text="Repair intensity [1/h]").grid(row=1)
 
         if self.object == "edge":
             tk.Label(self.root, text="Weight").grid(row=2)
+            tk.Label(self.root, text="Capacity [Gbit/s]").grid(row=3)
 
     def _onClosing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
@@ -45,8 +46,8 @@ class NetworkParameterInput:
             self._linkEntry()
 
     def _setButtons(self):
-        tk.Button(self.root, text="Submit", command=self._submitHandler).grid(row=3, column=0, sticky=tk.W, pady=4)
-        tk.Button(self.root, text="Quit", command=self._quit).grid(row=3, column=1, sticky=tk.W, pady=4)
+        tk.Button(self.root, text="Submit", command=self._submitHandler).grid(row=4, column=0, sticky=tk.W, pady=4)
+        tk.Button(self.root, text="Quit", command=self._quit).grid(row=4, column=1, sticky=tk.W, pady=4)
 
     def _submitHandler(self):
         failure = self._stringToFloat(self.failure_intensity.get())
@@ -60,11 +61,13 @@ class NetworkParameterInput:
             self.graph.node[self.selected]['repair_intensity'] = repair
         else:
             weight = self._stringToFloat(self.weight.get())
-            if weight == "invalid":
+            capacity = self._stringToFloat(self.capacity.get())
+            if weight == "invalid" or capacity == "invalid":
                 return
             self.graph[self.selected[0]][self.selected[1]]['failure_intensity'] = failure
             self.graph[self.selected[0]][self.selected[1]]['repair_intensity'] = repair
             self.graph[self.selected[0]][self.selected[1]]['weight'] = weight
+            self.graph[self.selected[0]][self.selected[1]]['capacity'] = capacity
 
         self._quit()
 
@@ -91,6 +94,11 @@ class NetworkParameterInput:
         self.weight.grid(row=2, column=1)
         if 'weight' in edge:
             self.weight.insert(tk.END, edge['weight'])
+
+        self.capacity = tk.Entry(self.root)
+        self.capacity.grid(row=3, column=1)
+        if 'capacity' in edge:
+            self.capacity.insert(tk.END, edge['capacity'])
 
     def run(self):
         self.root.mainloop()

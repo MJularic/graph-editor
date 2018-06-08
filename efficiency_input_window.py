@@ -2,10 +2,10 @@ import tkinter as tk
 from fastnumbers import fast_float
 
 
-class TimeInputWindow:
+class EfficiencyInputWindow:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Set simulation time")
+        self.root.title("Set efficiency")
         self.root.resizable(False, False)
         self.root.geometry("300x80")
         self._setButtons()
@@ -20,7 +20,8 @@ class TimeInputWindow:
         return self.result
 
     def _setLabels(self):
-        tk.Label(self.root, text="Time [h]").grid(row=0)
+        tk.Label(self.root, text="Efficiency").grid(row=0)
+
 
     def _setEntry(self):
         self.time = tk.Entry(self.root)

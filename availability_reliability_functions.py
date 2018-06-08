@@ -30,8 +30,10 @@ def dijkstraCalculation(graph, first, last, mode):
     for i in range(len(min_path)):
         if i < len(min_path) - 1:
             H.remove_edge(min_path[i], min_path[i + 1])
-
-    not_min_path = nx.dijkstra_path(H, first, last)
+    try:
+        not_min_path = nx.dijkstra_path(H, last, first)
+    except Exception as e:
+        return e
 
     if mode == 'A':
         up = calculateAvailability(graph, min_path)
@@ -62,7 +64,10 @@ def averageAvailabilityDijkstra(graph):
     for node in nodes:
         for node1 in nodes:
             if node1 > node:
-                all_availabilities.append(dijkstraCalculation(graph, node, node1, 'A'))
+                try:
+                    all_availabilities.append(dijkstraCalculation(graph, node, node1, 'A'))
+                except Exception as e:
+                    return e
     sum_availabilities = 0
     for number in all_availabilities:
         sum_availabilities += number
@@ -75,7 +80,10 @@ def stAvailabilityDijkstra(graph):
     for node in nodes:
         for node1 in nodes:
             if node1 > node:
-                current = dijkstraCalculation(graph, node, node1, 'A')
+                try:
+                    current = dijkstraCalculation(graph, node, node1, 'A')
+                except Exception as e:
+                    return e
                 if current < min_availability:
                     min_availability = current
     return min_availability
