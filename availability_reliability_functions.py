@@ -145,6 +145,8 @@ def transformation(graph, t):
     return transformed_graph
 
 def transformationCalculate(lamb, mi, t):
+    if lamb == 0:
+        return 1,1
     mttf = 1 / lamb
     mttr = 1 / mi
     a = mttf / (mttf + mttr)
