@@ -455,16 +455,16 @@ class App(pyglet.window.Window):
         if len(file_path) != 0:
             file = open(file_path, "w")
             file.write("AVAILABILITY: "
-                       + format(availability, ".2f") +
+                       + str(availability) +
                        "\n\nRELIABILITY: " +
-                       format(reliability, ".2f") +
+                       str(reliability) +
                        "\n\nYEARLY LOSS: " +
                        format(yearly_traffic_loss, ".2f") + " Gbit")
             file.close()
         Alert.alert("Availability: "
-                    + format(availability, ".2f")
+                    + str(availability, ".6f")
                     + "\nReliability: "
-                    + format(reliability, ".2f")
+                    + str(reliability, ".6f")
                     + "\nYearly traffic loss: "
                     + format(yearly_traffic_loss, ".2f") + " Gbit"
                     , "CALCULATIONS")

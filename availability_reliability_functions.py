@@ -13,7 +13,6 @@ def calculateReliability(graph, path):
             reliability *= graph.get_edge_data(path[i], path[i + 1])['R']
     return reliability
 
-
 def calculateAvailability(graph, path):
     availability = 1
     for i in range(len(path)):
@@ -88,7 +87,6 @@ def stAvailabilityDijkstra(graph):
                     min_availability = current
     return min_availability
 
-
 def averageAvailabilityAbraham(graph):
     nodes = graph.nodes()
     all_availabilities = []
@@ -102,7 +100,6 @@ def averageAvailabilityAbraham(graph):
         sum_availabilities += number
     average = sum_availabilities / len(all_availabilities)
     return average
-
 
 def stAvailabilityAbraham(graph):
     nodes = graph.nodes()
@@ -145,6 +142,8 @@ def transformation(graph, t):
     return transformed_graph
 
 def transformationCalculate(lamb, mi, t):
+    if lamb == 0:
+        return 1, 1
     mttf = 1 / lamb
     mttr = 1 / mi
     a = mttf / (mttf + mttr)
