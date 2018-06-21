@@ -462,15 +462,9 @@ class App(pyglet.window.Window):
                        format(yearly_traffic_loss, ".2f") + " Gbit")
             file.close()
         Alert.alert("Availability: "
-<<<<<<< HEAD
-                    + str(availability, ".6f")
-                    + "\nReliability: "
-                    + str(reliability, ".6f")
-=======
                     + str(availability)
                     + "\nReliability: "
                     + str(reliability)
->>>>>>> a8cbdae62b734364066f8d3e1c2a25ab1a2f77b8
                     + "\nYearly traffic loss: "
                     + format(yearly_traffic_loss, ".2f") + " Gbit"
                     , "CALCULATIONS")
