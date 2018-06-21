@@ -131,21 +131,24 @@ def transformation(graph, t):
     transformed_graph = nx.Graph()
     nodes = graph.nodes()
     for node in nodes:
-        a, r = transformationCalculate(graph.node[node]['failure_intensity'], graph.node[node]['repair_intensity'], t)
+        lamb1 = graph.node[node]['failure_intensity']
+        lamb1 = lamb1 / math.pow(10, 9)
+        a, r = transformationCalculate(lamb1, graph.node[node]['repair_intensity'], t, 1)
         transformed_graph.add_node(node, A=a, R=r)
 
     for u, v, k in graph.edges(data=True):
         lamb1 = k['failure_intensity']
-        mi1 = k['repair_intensity']
-        a, r = transformationCalculate(lamb1, mi1, t)
+        lamb1 = lamb1 / math.pow(10, 9)
+        mttr = k['repair_intensity']
+        we = k['weight']
+        a, r = transformationCalculate(lamb1, mttr, t, we)
         transformed_graph.add_edge(u, v, A=a, R=r, weight=k['weight'])
     return transformed_graph
 
-def transformationCalculate(lamb, mi, t):
+def transformationCalculate(lamb, mttr, t, weight):
     if lamb == 0:
         return 1, 1
-    mttf = 1 / lamb
-    mttr = 1 / mi
+    mttf = (1 / lamb)/weight
     a = mttf / (mttf + mttr)
     r = math.exp(-lamb * t)
     return a, r

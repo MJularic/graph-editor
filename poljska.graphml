@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key attr.name="weight" attr.type="double" for="edge" id="d7" />
+  <key attr.name="repair_intensity" attr.type="double" for="edge" id="d6" />
+  <key attr.name="capacity" attr.type="double" for="edge" id="d5" />
+  <key attr.name="failure_intensity" attr.type="double" for="edge" id="d4" />
+  <key attr.name="repair_intensity" attr.type="double" for="node" id="d3" />
+  <key attr.name="y" attr.type="double" for="node" id="d2" />
+  <key attr.name="x" attr.type="double" for="node" id="d1" />
+  <key attr.name="failure_intensity" attr.type="double" for="node" id="d0" />
+  <graph edgedefault="undirected">
+    <node id="0">
+      <data key="d0">5000.0</data>
+      <data key="d1">1.93</data>
+      <data key="d2">4.41</data>
+      <data key="d3">24.0</data>
+    </node>
+    <node id="1">
+      <data key="d0">5000.0</data>
+      <data key="d1">3.57</data>
+      <data key="d2">5.2</data>
+      <data key="d3">24.0</data>
+    </node>
+    <node id="2">
+      <data key="d0">5000.0</data>
+      <data key="d1">5.28</data>
+      <data key="d2">5.25</data>
+      <data key="d3">24.0</data>
+    </node>
+    <node id="3">
+      <data key="d0">5000.0</data>
+      <data key="d1">2.88</data>
+      <data key="d2">3.63</data>
+      <data key="d3">24.0</data>
+    </node>
+    <node id="4">
+      <data key="d0">5000.0</data>
+      <data key="d1">4.44</data>
+      <data key="d2">3.57</data>
+      <data key="d3">24.0</data>
+    </node>
+    <node id="5">
+      <data key="d0">5000.0</data>
+      <data key="d1">5.93</data>
+      <data key="d2">3.55</data>
+      <data key="d3">24.0</data>
+    </node>
+    <node id="6">
+      <data key="d0">5000.0</data>
+      <data key="d1">7.18</data>
+      <data key="d2">4.29</data>
+      <data key="d3">24.0</data>
+    </node>
+    <edge source="0" target="1">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">182.0</data>
+    </edge>
+    <edge source="0" target="3">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">145.0</data>
+    </edge>
+    <edge source="1" target="2">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">119.0</data>
+    </edge>
+    <edge source="2" target="6">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">176.0</data>
+    </edge>
+    <edge source="3" target="4">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">108.0</data>
+    </edge>
+    <edge source="4" target="5">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">143.0</data>
+    </edge>
+    <edge source="5" target="6">
+      <data key="d4">110.0</data>
+      <data key="d5">1.0</data>
+      <data key="d6">48.0</data>
+      <data key="d7">328.0</data>
+    </edge>
+  </graph>
+</graphml>

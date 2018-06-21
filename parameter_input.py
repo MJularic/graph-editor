@@ -17,11 +17,11 @@ class NetworkParameterInput:
         self.closed = False
 
     def _setLabels(self):
-        tk.Label(self.root, text="Failure intensity [1/h]").grid(row=0)
-        tk.Label(self.root, text="Repair intensity [1/h]").grid(row=1)
+        tk.Label(self.root, text="Failure intensity [FIT]").grid(row=0)
+        tk.Label(self.root, text="Repair intensity [h]").grid(row=1)
 
         if self.object == "edge":
-            tk.Label(self.root, text="Weight").grid(row=2)
+            tk.Label(self.root, text="Length").grid(row=2)
             tk.Label(self.root, text="Capacity [Gbit/s]").grid(row=3)
 
     def _onClosing(self):
